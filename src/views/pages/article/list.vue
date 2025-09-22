@@ -1,10 +1,13 @@
 <template>
     <div>
         <SubHeader :breadcrumb="breadcrumb" class="mb-4">
-            <BtnBase @click="addCategory" text="Thêm mới Chương trình học" :width="250"></BtnBase>
+            <BtnBase @click="addArticle" text="Thêm mới Bài viết" :width="250"></BtnBase>
         </SubHeader>
         <Content>
-            <DataTable :itemHeader="Header" :itemValue="categories" :paginate="paginate" @getPage="getPage">
+            <DataTable :itemHeader="Header" :itemValue="articles" :paginate="paginate" @getPage="getPage">
+                <template v-slot:content="item: any">
+                    <div class="max-h-[150px] overflow-auto" v-html="item.content"></div>
+                </template>
                 <template v-slot:url="item: any">
                     <div class="flex">
                         <img :src="item.url" alt="ảnh" class="w-[200px] my-2" />
@@ -34,7 +37,7 @@ import SubHeader from "@/views/theme/SubHeader.vue"
 import Content from "@/views/theme/Content.vue"
 import { useRouter } from 'vue-router';
 import { onMounted, computed, ref } from 'vue';
-import { useCategoryStore } from '@/stores/category';
+import { useArticleStore } from '@/stores/article';
 import penIcon from '@/assets/images/icon/pen-icon.svg'
 import trashIcon from '@/assets/images/icon/trash-icon.svg'
 import { messageSuccess } from "@/common/message.service"
@@ -46,18 +49,19 @@ const loading = useLoadingStore();
 const isOpen = ref(false)
 const selectedId = ref<number | null>(null)
 const router = useRouter();
-const store = useCategoryStore();
+const store = useArticleStore();
 
-const categories = computed(() => store.categories);
+const articles = computed(() => store.articles);
 const paginate = computed(() => store.paginate ?? {})
 
 const Header = [
-    { text: "Tên Chuyên mục", value: "title", align: "left", width: 400 },
-    { text: "Slug", value: "slug", align: "left", width: 200 },
-    { text: "Mô tả", value: "description", align: "left", width: 300 },
-    { text: "Ảnh", value: "url", align: "left", width: 220 },
-    { text: "Kích hoạt", value: "active", align: "left", width: 150 },
-    { text: "Thao tác", value: "action", align: "left", width: 120 },
+    { text: "Tên Bài viết", value: "title", align: "center", width: 400 },
+    { text: "Slug", value: "slug", align: "center", width: 200 },
+    { text: "Mô tả", value: "description", align: "center", width: 300 },
+    { text: "Nội dung", value: "content", align: "center", width: 300 },
+    { text: "Ảnh", value: "url", align: "center", width: 220 },
+    { text: "Kích hoạt", value: "active", align: "center", width: 150 },
+    { text: "Thao tác", value: "action", align: "center", width: 120 },
 ]
 
 const breadcrumb = [
@@ -69,20 +73,20 @@ const pagination = ref({
     limit: 10
 })
 
-const addCategory = () => {
-    router.push('/category/create');
+const addArticle = () => {
+    router.push('/article/create');
 };
 
 const editItem = (id: number) => {
-    router.push(`/category/edit/${id}`);
+    router.push(`/article/edit/${id}`);
 };
 
 const onConfirm = async () => {
     if (selectedId.value !== null) {
-        const success = await store.deleteCategory(selectedId.value);
+        const success = await store.deleteArticle(selectedId.value);
         if (success) {
             messageSuccess('Xóa thành công');
-            await store.fetchCategories();
+            await store.fetchArticles();
         }
     }
     isOpen.value = false;
@@ -99,7 +103,7 @@ const openDeletePopup = (id: number) => {
 };
 
 onMounted(async () => {
-    await store.fetchCategories({
+    await store.fetchArticles({
         page: pagination.value.page,
         limit: pagination.value.limit
     });
@@ -108,20 +112,20 @@ onMounted(async () => {
 const getPage = async (params: any) => {
     pagination.value.page = params.page ?? 1
     pagination.value.limit = params.limit ? JSON.parse(params.limit) : 10
-    await store.fetchCategories({
+    await store.fetchArticles({
         page: pagination.value.page,
         limit: pagination.value.limit
     });
 }
 
-const category = ref<any>({});
+const article = ref<any>({});
 const updatePublished = async (status: any, id: any) => {
     loading.setLoading(true)
     // await projectComp.detailProject(id)
-    await store.getCategoryDetail(id);
-    category.value = store.categoryDetail;
-    category.value.active = status;
-    await store.saveCategory(category.value)
+    await store.getArticleDetail(id);
+    article.value = store.articleDetail;
+    article.value.active = status;
+    await store.saveArticle(article.value)
     loading.setLoading(false);
 }
 </script>

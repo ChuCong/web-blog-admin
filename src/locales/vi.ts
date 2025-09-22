@@ -47,8 +47,8 @@ export default {
   action: "THAO TÁC",
   menu: {
     home: 'Dashboard',
-    category: "Quản lý Chương trình học",
-    course: "Quản lý Khóa học",
+    category: "Quản lý Chuyên mục",
+    article: "Quản lý bài viết",
     tag: "Quản lý Tag",
     resource: "Quản lý Tài nguyên",
     comment: "Quản lý Bình luận",
