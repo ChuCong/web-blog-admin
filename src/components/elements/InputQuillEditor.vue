@@ -7,15 +7,17 @@ import { onMounted, ref, watch } from "vue";
 import "quill/dist/quill.snow.css"
 import { useImageStore } from "@/stores/image"
 
-// import thêm module resize ảnh
 import Quill from "quill";
 import ImageResize from "quill-image-resize-module-react";
 Quill.register("modules/imageResize", ImageResize);
+
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import php from "highlight.js/lib/languages/php";
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("php", php);
+
+// bạn có thể đổi sang "vs2015.css" nếu thích VS Code dark theme
 import "highlight.js/styles/github.css";
 
 export default {
@@ -59,6 +61,7 @@ export default {
               ["blockquote", "code-block"],
               ["link", "image", "video"],
               ["clean"],
+              ["myCodeBtn"] // 👉 thêm nút custom
             ],
             handlers: {
               image: function () {
@@ -74,13 +77,9 @@ export default {
                   if (file) {
                     const formData = new FormData();
                     formData.append('upload', file);
-                    // const formData = new FormData();
-                    // formData.append("image", file);
 
                     try {
-                      // uploadImage cần trả về url ảnh từ server
                       const response = await store.uploadImage(formData);
-
                       const imageUrl = response?.url || response;
                       if (imageUrl) {
                         const range = quill.getSelection();
@@ -95,6 +94,14 @@ export default {
                   }
                 };
               },
+              // 👉 handler cho nút custom
+              myCodeBtn: function () {
+                const range = quill.getSelection();
+                if (range) {
+                  const format = quill.getFormat(range);
+                  quill.format("code-block", !format["code-block"]);
+                }
+              }
             },
           },
           imageResize: {
@@ -138,16 +145,25 @@ export default {
   color: #999;
 }
 
+/* code block style */
 .ql-syntax {
-  background: #1e1e1e;
+  background: #1e1e1e;  /* nền tối */
   color: #f8f8f2;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px 16px;
+  border-radius: 6px;
   overflow-x: auto;
-  /* có scroll ngang */
   white-space: pre;
-  /* giữ format dòng */
-  font-family: monospace;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 12px 0;
+  border: 1px solid #333;
+}
+
+/* 👉 custom nút </> */
+.ql-myCodeBtn::before {
+  content: "</>";
+  font-weight: bold;
   font-size: 14px;
 }
 </style>
